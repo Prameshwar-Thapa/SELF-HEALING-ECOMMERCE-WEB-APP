@@ -231,8 +231,9 @@ This project demonstrates my understanding of:
 
 ## Documentation
 
-- **[AWS Console Guide](aws_console_step_by_step_guide.md)**: Manual setup instructions
-- **[Terraform Guide](terraform_guide.md)**: Infrastructure deployment details
+- **[AWS Console Guide](doc/aws_console_step_by_step_guide.md)**: Manual setup instructions
+- **[Troubleshooting Guide](doc/troubleshoot.md)**: Real-world challenges and solutions
+- **[Terraform Guide](terraform/README.md)**: Infrastructure deployment details
 - **[Architecture Diagrams](generated-diagrams/)**: Visual system representations
 
 ## Getting Help
