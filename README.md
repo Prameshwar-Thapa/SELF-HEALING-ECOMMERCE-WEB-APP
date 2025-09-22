@@ -211,7 +211,6 @@ terraform apply -var-file="terraform.tfvars.prod"
 - **Database Sharding**: Horizontal scaling strategies
 - **Cost Optimization**: Reserved instances and Spot fleet integration
 
-## Interview Talking Points
 
 This project demonstrates my understanding of:
 

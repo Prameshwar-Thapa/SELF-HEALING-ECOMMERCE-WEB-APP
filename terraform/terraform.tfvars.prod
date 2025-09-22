@@ -1,0 +1,36 @@
+# Production Environment Configuration
+project_name = "self-healing"
+environment  = "prod"
+aws_region   = "us-east-1"
+
+# Network Configuration
+vpc_cidr = "10.1.0.0/16"
+azs      = ["us-east-1a", "us-east-1b", "us-east-1c"]
+
+# Database Configuration (Prod - High Performance, Multi-AZ)
+aws_db_instance_class = "db.t3.small"
+db_name              = "ecommerce_db"
+deletion_protection  = true
+
+# Compute Configuration (Prod - Better Performance)
+ec2_instance_type    = "t3.small"
+bastion_instance_type = "t3.micro"
+
+# Auto Scaling Configuration (Prod - Higher Capacity)
+asg_min_size         = 2
+asg_max_size         = 6
+asg_desired_capacity = 3
+
+# Application Configuration
+api_url = ""
+
+# Tags
+tags = {
+  Project     = "self-healing"
+  Environment = "prod"
+  ManagedBy   = "terraform"
+  Owner       = "production-team"
+  CostCenter  = "production"
+  Backup      = "required"
+  Monitoring  = "critical"
+}

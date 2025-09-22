@@ -1,0 +1,105 @@
+name: Develop - Validate & Plan (auto PR)
+
+on:
+  push:
+    branches: [develop]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+  actions: read
+
+concurrency:
+  group: terraform-develop
+  cancel-in-progress: true
+
+jobs:
+  terraform-validate-plan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+
+      - name: Terraform Fmt (check)
+        working-directory: ./terraform
+        run: terraform fmt -check -recursive
+
+      - name: Terraform Validate
+        working-directory: ./terraform
+        run: terraform validate
+
+      # Capture detailed exit code: 0=no changes, 2=changes, 1=error
+      - name: Terraform Plan (Dev) with detailed exit code
+        id: plan
+        working-directory: ./terraform
+        shell: bash
+        run: |
+          set +e
+          terraform plan -var-file="terraform.tfvars.dev" -no-color -detailed-exitcode -out=tfplan
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+
+          if [ -f tfplan ]; then
+            terraform show -no-color tfplan > ../plan-dev.txt || true
+          else
+            echo "No plan file produced" > ../plan-dev.txt
+          fi
+
+      - name: Upload plan artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: plan-dev
+          path: plan-dev.txt
+
+      - name: Create PR develop → main
+        if: steps.plan.outputs.exit_code == '2'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          base: main
+          branch: develop
+          title: "Promote develop to main"
+          body: |
+            All validations passed on develop.
+            Terraform plan shows changes. Auto-created PR.
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          ec="${{ steps.plan.outputs.exit_code }}"
+          if [ -z "$ec" ]; then
+            echo "Plan did not emit an exit code"
+            exit 1
+          fi
+
+          if [ "$ec" = "0" ]; then
+            echo "No infra changes detected on develop"
+          elif [ "$ec" = "2" ]; then
+            echo "Changes detected. PR opened from develop → main"
+          else
+            echo "Plan failed"
+            exit 1
+          fi

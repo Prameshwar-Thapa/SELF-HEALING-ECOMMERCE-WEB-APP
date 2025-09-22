@@ -1,0 +1,57 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  id-token: write
+  actions: read
+
+concurrency:
+  group: terraform-main
+  cancel-in-progress: false
+
+jobs:
+  terraform-apply:
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.0
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+
+      - name: Terraform Plan (Prod)
+        working-directory: ./terraform
+        run: terraform plan -var-file="terraform.tfvars.prod" -input=false -out=tfplan
+
+      - name: Terraform Apply (Prod)
+        working-directory: ./terraform
+        run: terraform apply -input=false -auto-approve tfplan
+
+      - name: Get Deployment URLs
+        working-directory: ./terraform
+        run: |
+          echo "Frontend URL: https://$(terraform output -raw cloudfront_domain_name)"
+          echo "API Health: https://$(terraform output -raw cloudfront_domain_name)/health"
+          echo "Bastion IP: $(terraform output -raw bastion_public_ip)"
+
+      - name: Deployment Success
+        run: echo "Production deployment completed successfully"
