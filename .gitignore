@@ -80,10 +80,13 @@ test-results/
 .cache/
 .parcel-cache/
 
-# Documentation folder - exclude specific files, keep aws_console and troubleshoot
-doc/
-!doc/aws_console_step_by_step_guide.md
-!doc/troubleshoot.md
+# Documentation folder - exclude specific files only
+doc/webapp-workflow.md
+doc/CICD_SETUP_GUIDE.md
+doc/github_branch_protection_setup.md
+doc/github_settings_guide.md
+doc/PIPELINE_SETUP.md
+doc/terraform_guide.md
 
 # Setup scripts
 setup-pipeline.sh
