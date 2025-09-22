@@ -17,7 +17,7 @@ This infrastructure automatically:
 
 ## Architecture
 
-![Self-Healing E-commerce Architecture](generated-diagrams/diagram_1e8cd5f5.png)
+![Self-Healing E-commerce Architecture](generated-diagrams/complete-self-healing-architecture.png)
 
 **3-Tier Design:**
 - **Frontend**: React app served via CloudFront CDN + S3
