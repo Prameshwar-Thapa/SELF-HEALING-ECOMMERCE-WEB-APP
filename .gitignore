@@ -80,8 +80,10 @@ test-results/
 .cache/
 .parcel-cache/
 
-# Documentation folder (setup guides and personal reference files)
+# Documentation folder - exclude specific files, keep aws_console and troubleshoot
 doc/
+!doc/aws_console_step_by_step_guide.md
+!doc/troubleshoot.md
 
 # Setup scripts
 setup-pipeline.sh
